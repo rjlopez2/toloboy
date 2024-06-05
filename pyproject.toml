@@ -32,7 +32,26 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8.1, <4.0"
+python = ">=3.9.1, <4.0"
+numpy = "^1.26.4"
+matplotlib = "^3.9.0"
+# torch = [
+#     {version = "=2.1.0", source = "pypi", platform = "darwin"},
+    # {platform = "linux", version = "2.3.0+cu121"},
+    # {platform = "win32", version = "1.1.1"}
+# ]
+# torch = [
+#     { version = "^2.2.0", source = "pypi", markers = "sys_platform == 'darwin'"},
+#     { version = "^2.2.0", source = "pypi", markers = "platform_machine == 'aarch64' and sys_platform != 'darwin'"},
+#     { version = "^2.2.0", source = "pytorch_cpu", markers = "platform_machine == 'x86_64' and sys_platform != 'darwin'" },
+# ]
+# [[tool.poetry.source]]
+# name = "pytorch_cpu"
+# url = "https://download.pytorch.org/whl/cpu"
+# priority = "explicit"
+pandas = "^2.2.2"
+pillow = "^10.3.0"
+
 
 [tool.poetry.group.dev.dependencies]
 mkdocstrings = {version = ">=0.23", extras = ["python"]}
