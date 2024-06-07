@@ -10,7 +10,7 @@ url = "https://perritos.myasustor.com:1985/data/img_id_1550.jpg"
 response = requests.get(url)  # noqa: S113
 img = Image.open(BytesIO(response.content))
 
-def from_LAB_to_RGB_img_test(img_test:Any = img)-> None:
+def test_from_LAB_to_RGB_img(img_test:Any = img)-> None:
     # retrieve a sample image
     img_test_np = np.asarray(img_test)
     x_s, y_s, _ = img_test_np.shape
@@ -20,7 +20,7 @@ def from_LAB_to_RGB_img_test(img_test:Any = img)-> None:
     new_img = to.from_LAB_to_RGB_img(l, ab)
     assert np.allclose(img_test_np, new_img.reshape((x_s, y_s, -1)))
 
-def RGB2LAB_test() -> None:
+def test_RGB2LAB() -> None:
     # this is just a dumb test.
     # No sure what/how to test here
     # may be check if the results are comparable to opencv lib?
@@ -31,7 +31,7 @@ def RGB2LAB_test() -> None:
     # _ = to.RGB2LAB(r, g.reshape(-1, 1), b.reshape(-1, 1) )
     assert True
 
-def LAB22RGB_test() -> None:
+def test_LAB22RGB() -> None:
     # this is just a dumb test.
     # No sure what/how to test here
 
@@ -45,13 +45,13 @@ def LAB22RGB_test() -> None:
     assert True
 
 
-def plot_multiple_imgs_test() -> None:
+def test_plot_multiple_imgs_test() -> None:
     # this is just a dumb test.
 
     assert True
 
 
-def psnr_test(img_test:Any = img) -> None:
+def test_psnr_test(img_test:Any = img) -> None:
      # this is just a dumb test.
      img_test_np = np.asarray(img_test)
      rms_img_test = to.psnr(imageA=img_test_np, imageB=img_test_np)
@@ -59,7 +59,7 @@ def psnr_test(img_test:Any = img) -> None:
      assert np.allclose(rms_img_test, rms_img_test)
 
 
-def mse_test(img_test:Any = img) -> None:
+def test_mse_test(img_test:Any = img) -> None:
      # this is just a dumb test.
      img_test_np = np.asarray(img_test)
      rms_img_test = to.mse(imageA=img_test_np, imageB=img_test_np, nband=2)
@@ -67,7 +67,7 @@ def mse_test(img_test:Any = img) -> None:
      assert np.allclose(rms_img_test, rms_img_test)
 
 
-def mae_test(img_test:Any = img) -> None:
+def test_mae_test(img_test:Any = img) -> None:
      # this is just a dumb test.
      img_test_np = np.asarray(img_test)
      rms_img_test = to.mae(imageA=img_test_np, imageB=img_test_np, nband=2)
@@ -75,7 +75,7 @@ def mae_test(img_test:Any = img) -> None:
      assert np.allclose(rms_img_test, rms_img_test)
 
 
-def rmse_test(img_test:Any = img) -> None:
+def test_rmse_test(img_test:Any = img) -> None:
      # this is just a dumb test.
      img_test_np = np.asarray(img_test)
      rms_img_test = to.rmse(imageA=img_test_np, imageB=img_test_np, nband=2)
