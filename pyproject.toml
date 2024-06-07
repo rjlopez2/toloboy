@@ -85,7 +85,9 @@ ignore = [
     "N803",
     "N802",
     "ERA001",
-    "PLR0913"
+    "PLR0913",
+    "COM812", # htis complaisn CI with ruff-format. No sure the reason.
+    "ISC001", # htis complaisn CI with ruff-format. No sure the reason.
     ]
 
 [tool.ruff.lint.per-file-ignores]
