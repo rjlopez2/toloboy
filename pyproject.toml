@@ -115,8 +115,11 @@ addopts = """\
     --no-cov-on-fail \
 """
 
+[tool.coverage.run]
+branch = true
+
 [tool.coverage.report]
-fail_under = 80
+fail_under = 70
 exclude_lines = [
     'if TYPE_CHECKING:',
     'pragma: no cover'
