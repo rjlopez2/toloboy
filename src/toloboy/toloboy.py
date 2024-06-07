@@ -185,7 +185,8 @@ def plot_multiple_imgs(
     imgs_ls : list[npt.NDArray[np.uint8]  |  Any]
         A list of one or multiples images.
     with_orig : bool, optional
-        NOTE: need to check what this does in practice dso I can maybe remove it, by default True
+        NOTE: need to check what this does in practice so I can maybe remove it,
+        by default True
     col_title : list[str] | Any, optional
         List of titles to ad to the images , by default "None"
     img_size : int, optional
@@ -212,7 +213,7 @@ def plot_multiple_imgs(
         figsize=(img_size, img_size),
     )
     for row_idx, row in enumerate(imgs_ls):
-        row = [orig_img] + row if with_orig else row  # noqa: RUF005
+        row = [orig_img] + row if with_orig else row  # noqa: RUF005,, PLW2901
         for col_idx, img in enumerate(row):
             ax = axs[row_idx, col_idx]
             ax.imshow(np.asarray(img), **imshow_kwargs)
