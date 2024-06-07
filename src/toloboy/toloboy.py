@@ -1,13 +1,12 @@
-import numpy as np
-from matplotlib import pyplot as plt
-import math
-import pandas as pd
-from PIL import Image
-import requests
-from io import BytesIO
 from __future__ import annotations
+
+import math
 from typing import Any
+
+import numpy as np
 import numpy.typing as npt
+from matplotlib import pyplot as plt
+
 # from torch.utils.data import Dataset #NOTE: installing pytorch with poetry is a pain in the ass!
 
 ####################
@@ -18,10 +17,15 @@ import numpy.typing as npt
 #### Color space transformers functions ####
 ############################################
 
-def RGB2LAB2(R0: npt.NDArray[np.uint8], G0: npt.NDArray[np.uint8], B0: npt.NDArray[np.uint8]) ->  'tuple[npt.NDArray[np.float32],npt.NDArray[np.float32],npt.NDArray[np.float32]]':
+
+def RGB2LAB2(
+    R0: npt.NDArray[np.uint8],
+    G0: npt.NDArray[np.uint8],
+    B0: npt.NDArray[np.uint8],
+) -> tuple[npt.NDArray[np.float32], npt.NDArray[np.float32], npt.NDArray[np.float32]]:
     """
-    convert RGB to the personal LAB (LAB2) 
-    the input R,G,B,  must be 1D from 0 to 255 
+    convert RGB to the personal LAB (LAB2)
+    the input R,G,B,  must be 1D from 0 to 255
     the outputs are 1D  L [0 1], a [-1 1] b [-1 1]
 
     Expeceted arguments are flattened array for each
@@ -40,32 +44,32 @@ def RGB2LAB2(R0: npt.NDArray[np.uint8], G0: npt.NDArray[np.uint8], B0: npt.NDArr
     -------
     tuple[np.uint8, np.uint8, np.uint8]
         return a tuple of size 3 containing the 1D channels (L, A, B)
-    """    
-   
+    """
 
-    R=R0/255
-    G=G0/255
-    B=B0/255
-    
-    
-    Y=0.299*R + 0.587*G + 0.114*B
-    X=0.449*R + 0.353*G + 0.198*B
-    Z=0.012*R + 0.089*G + 0.899*B  
-        
+    R = R0 / 255
+    G = G0 / 255
+    B = B0 / 255
+
+    Y = 0.299 * R + 0.587 * G + 0.114 * B
+    X = 0.449 * R + 0.353 * G + 0.198 * B
+    Z = 0.012 * R + 0.089 * G + 0.899 * B
+
     L = Y
-    A = (X - Y)/0.234
-    B = (Y - Z)/0.785
-    
+    A = (X - Y) / 0.234
+    B = (Y - Z) / 0.785
+
     return L, A, B
 
 
-
-
-def LAB22RGB(L: npt.NDArray[np.uint8], a: npt.NDArray[np.uint8], b: npt.NDArray[np.uint8]) ->  'tuple[np.uint8, np.uint8, np.uint8]':
+def LAB22RGB(
+    L: npt.NDArray[np.uint8],
+    a: npt.NDArray[np.uint8],
+    b: npt.NDArray[np.uint8],
+) -> tuple[np.uint8, np.uint8, np.uint8]:
     """
     LAB22RGB _summary_
 
-    onvert the personal LAB (LAB2)to the RGB 
+    onvert the personal LAB (LAB2)to the RGB
     the input L,a,b,  must be 1D L [0 1], a [-1 1] b [-1 1]
     the outputs are 1D  R g B [0 255]
 
@@ -82,49 +86,51 @@ def LAB22RGB(L: npt.NDArray[np.uint8], a: npt.NDArray[np.uint8], b: npt.NDArray[
     -------
     tuple[np.uint8, np.uint8, np.uint8]
         return a tuple of size 3 containing the 1D channels (R, G. B)
-    
-    """       
+
+    """
     # L, a, b = [array.reshape(-1, 1) for array in [L, a, b]]
     a11 = 0.299
     a12 = 0.587
     a13 = 0.114
-    a21 = (0.15/0.234)
-    a22 = (-0.234/0.234)
-    a23 = (0.084/0.234)
-    a31 = (0.287/0.785)
-    a32 = (0.498/0.785)
-    a33 = (-0.785/0.785)
-    
-    aa=np.array([[a11, a12, a13], [a21, a22, a23], [a31, a32, a33]])
-    C0=np.zeros((L.shape[0],3))
-    C0[:,0]=L[:,0]
-    C0[:,1]=a[:,0]
-    C0[:,2]=b[:,0]
+    a21 = 0.15 / 0.234
+    a22 = -0.234 / 0.234
+    a23 = 0.084 / 0.234
+    a31 = 0.287 / 0.785
+    a32 = 0.498 / 0.785
+    a33 = -0.785 / 0.785
+
+    aa = np.array([[a11, a12, a13], [a21, a22, a23], [a31, a32, a33]])
+    C0 = np.zeros((L.shape[0], 3))
+    C0[:, 0] = L[:, 0]
+    C0[:, 1] = a[:, 0]
+    C0[:, 2] = b[:, 0]
     C = np.transpose(C0)
-    
+
     X = np.linalg.inv(aa).dot(C)
-    X1D=np.reshape(X,(X.shape[0]*X.shape[1],1))
-    p0=np.where(X1D<0)
-    X1D[p0[0]]=0
-    p1=np.where(X1D>1)
-    X1D[p1[0]]=1
-    Xr=np.reshape(X1D,(X.shape[0],X.shape[1]))
-    
+    X1D = np.reshape(X, (X.shape[0] * X.shape[1], 1))
+    p0 = np.where(X1D < 0)
+    X1D[p0[0]] = 0
+    p1 = np.where(X1D > 1)
+    X1D[p1[0]] = 1
+    Xr = np.reshape(X1D, (X.shape[0], X.shape[1]))
+
     Rr = Xr[0][:]
     Gr = Xr[1][:]
     Br = Xr[2][:]
-    
-    R = np.uint(np.round(Rr*255))
-    G = np.uint(np.round(Gr*255))
-    B = np.uint(np.round(Br*255))
-    
+
+    R = np.uint(np.round(Rr * 255))
+    G = np.uint(np.round(Gr * 255))
+    B = np.uint(np.round(Br * 255))
+
     return R, G, B
 
 
-
-def from_LAB_to_RGB_img(L: npt.NDArray[np.uint8], AB:npt.NDArray[np.uint8]) -> 'npt.NDArray[np.uint8]':
+def from_LAB_to_RGB_img(
+    L: npt.NDArray[np.uint8],
+    AB: npt.NDArray[np.uint8],
+) -> npt.NDArray[np.uint8]:
     """
-    Takes the L and AB channels retunred from the transformation and 
+    Takes the L and AB channels retunred from the transformation and
     convert the image to RGB colorspace.
 
     retuns a 3d np.
@@ -138,35 +144,39 @@ def from_LAB_to_RGB_img(L: npt.NDArray[np.uint8], AB:npt.NDArray[np.uint8]) -> '
 
     Returns
     -------
-    np.ndarray : 
+    np.ndarray :
     A 3D numpyarray containing the RGB image.
     """
     x_dim, y_dim = L.shape[0], L.shape[1]
-    predicted_RGB = np.zeros((x_dim,y_dim,3), dtype=np.uint8)
+    predicted_RGB = np.zeros((x_dim, y_dim, 3), dtype=np.uint8)
     AB = np.squeeze(AB)
     # print(f"Shape o AB in conversion is {AB.shape}")
     a0, b0 = AB[:, :, 0], AB[:, :, 1]
 
     # print(f"{np.squeeze(L).shape}, {a0.shape}, {b0.shape}")
 
-    Rr, Gr, Br = LAB22RGB(L.reshape(-1, 1), 
-                          a0.reshape(-1, 1), 
-                          b0.reshape(-1, 1))
- 
-    predicted_RGB[:, :,0] = np.reshape(Rr,(x_dim,y_dim))
-    predicted_RGB[:, :,1] = np.reshape(Gr,(x_dim,y_dim))
-    predicted_RGB[:, :,2] = np.reshape(Br,(x_dim,y_dim))
+    Rr, Gr, Br = LAB22RGB(L.reshape(-1, 1), a0.reshape(-1, 1), b0.reshape(-1, 1))
 
+    predicted_RGB[:, :, 0] = np.reshape(Rr, (x_dim, y_dim))
+    predicted_RGB[:, :, 1] = np.reshape(Gr, (x_dim, y_dim))
+    predicted_RGB[:, :, 2] = np.reshape(Br, (x_dim, y_dim))
 
     return predicted_RGB
 
 
-
-def plot_multiple_imgs(orig_img: npt.NDArray[np.uint8], imgs_ls: list[npt.NDArray[np.uint8] | Any], with_orig:bool=True, col_title: 'list[str] | Any' = None, img_size: int = 10, font_s: int = 12, **imshow_kwargs:Any) -> None:   
+def plot_multiple_imgs(
+    orig_img: npt.NDArray[np.uint8],
+    imgs_ls: list[npt.NDArray[np.uint8] | Any],
+    with_orig: bool = True,
+    col_title: list[str] | Any = None,
+    img_size: int = 10,
+    font_s: int = 12,
+    **imshow_kwargs: Any,
+) -> None:
     """
     Plot a reference image with a list of other images.
 
-    Usefull to compare a reference image with 
+    Usefull to compare a reference image with
     a list of additional images after transformation,
     prediction, etc.
 
@@ -188,9 +198,8 @@ def plot_multiple_imgs(orig_img: npt.NDArray[np.uint8], imgs_ls: list[npt.NDArra
     Returns
     -------
     None
-        return a plot of multiples images. 
-    """    
-  
+        return a plot of multiples images.
+    """
 
     if not isinstance(imgs_ls[0], list):
         # Make a 2d grid even if there's just 1 row
@@ -198,23 +207,27 @@ def plot_multiple_imgs(orig_img: npt.NDArray[np.uint8], imgs_ls: list[npt.NDArra
 
     num_rows = len(imgs_ls)
     num_cols = len(imgs_ls[0]) + with_orig
-    fig, axs = plt.subplots(nrows=num_rows, ncols=num_cols, squeeze=False, figsize = (img_size, img_size))
+    fig, axs = plt.subplots(
+        nrows=num_rows,
+        ncols=num_cols,
+        squeeze=False,
+        figsize=(img_size, img_size),
+    )
     for row_idx, row in enumerate(imgs_ls):
         row = [orig_img] + row if with_orig else row
         for col_idx, img in enumerate(row):
             ax = axs[row_idx, col_idx]
             ax.imshow(np.asarray(img), **imshow_kwargs)
-            ax.set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])    
-    
+            ax.set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
+
     if col_title is not None:
         for ax, title in zip(axs.flatten(), col_title):
             ax.set_title(f"{title}", fontsize=font_s)
     else:
-        axs[0, 0].set(title='Original image')
+        axs[0, 0].set(title="Original image")
         axs[0, 0].title.set_size(font_s)
 
     plt.tight_layout()
-
 
 
 ############################
@@ -222,9 +235,9 @@ def plot_multiple_imgs(orig_img: npt.NDArray[np.uint8], imgs_ls: list[npt.NDArra
 ###########################
 
 
-def psnr(img1: npt.NDArray[np.uint8], img2: npt.NDArray[np.uint8]) -> 'float | Any':
+def psnr(img1: npt.NDArray[np.uint8], img2: npt.NDArray[np.uint8]) -> float | Any:
     """
-    psnr 
+    psnr
 
     Compute the 'Peak Signal-to-Noise Ratio' (psnr) metric
     from two given images.
@@ -244,8 +257,8 @@ def psnr(img1: npt.NDArray[np.uint8], img2: npt.NDArray[np.uint8]) -> 'float | A
     -------
     float | Any
         the psnr value from the two images
-    """ 
-    mse = np.mean( (img1.astype("float") - img2.astype("float")) ** 2 )
+    """
+    mse = np.mean((img1.astype("float") - img2.astype("float")) ** 2)
     # print(mse)
     if mse == 0:
         return 100
@@ -253,17 +266,20 @@ def psnr(img1: npt.NDArray[np.uint8], img2: npt.NDArray[np.uint8]) -> 'float | A
     return 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
 
 
-
-def mse(imageA: npt.NDArray[np.uint8], imageB: npt.NDArray[np.uint8], nband: int) -> 'float | Any':
+def mse(
+    imageA: npt.NDArray[np.uint8],
+    imageB: npt.NDArray[np.uint8],
+    nband: int,
+) -> float | Any:
     """
-    mse 
+    mse
 
     Compute the 'Mean Squared Error' (mse) metric
     from two given images. The mse is the
-	sum of the squared difference between the two images.
+        sum of the squared difference between the two images.
     The lower the value the more similar.
     NOTE: the two images must have the same dimension
-    
+
 
     Parameters
     ----------
@@ -281,18 +297,21 @@ def mse(imageA: npt.NDArray[np.uint8], imageB: npt.NDArray[np.uint8], nband: int
     """
     err = np.sum((imageA.astype("float") - imageB.astype("float")) ** 2)
     err /= float(imageA.shape[0] * imageA.shape[1] * nband)
-	
+
     return err
 
 
-
-def mae(imageA: npt.NDArray[np.uint8], imageB: npt.NDArray[np.uint8], nband: int) -> 'float | Any':
+def mae(
+    imageA: npt.NDArray[np.uint8],
+    imageB: npt.NDArray[np.uint8],
+    nband: int,
+) -> float | Any:
     """
-    mae 
-    
+    mae
+
     Compute the 'Mean Absolute Error' (mae) metric
     from two given images. The mse between the two images is the
-	sum of the squared difference between the two images.
+        sum of the squared difference between the two images.
     NOTE: the two images must have the same dimension
 
     Parameters
@@ -310,21 +329,24 @@ def mae(imageA: npt.NDArray[np.uint8], imageB: npt.NDArray[np.uint8], nband: int
         _description_
     """
     err = np.sum(np.abs(imageA.astype("float") - imageB.astype("float")))
-    err /= float(imageA.shape[0] * imageA.shape[1] * nband)    
+    err /= float(imageA.shape[0] * imageA.shape[1] * nband)
     return err
 
 
-
-def rmse(imageA: npt.NDArray[np.uint8], imageB: npt.NDArray[np.uint8], nband: int) -> 'float | Any':
+def rmse(
+    imageA: npt.NDArray[np.uint8],
+    imageB: npt.NDArray[np.uint8],
+    nband: int,
+) -> float | Any:
     """
-    rmse 
+    rmse
 
     Compute the 'Root Mean Squared Error' (rmse) metric
     from two given images.
     The rmse between the two images is the
-	sum of the squared difference between the two images.
+        sum of the squared difference between the two images.
     NOTE: the two images must have the same dimension
-    
+
 
     Parameters
     ----------
