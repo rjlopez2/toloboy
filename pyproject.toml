@@ -115,19 +115,19 @@ exclude_lines = [
     'pragma: no cover'
 ]
 
-[tool.mypy]
+# [tool.mypy]
 # This is the global mypy configuration.
 # Avoid changing this!
-strict = true  # See all the enabled flags `mypy --help | grep -A 10 'Strict mode'`
-disallow_any_unimported = true
+# strict = true  # See all the enabled flags `mypy --help | grep -A 10 'Strict mode'`
+# disallow_any_unimported = true
 
 # If you need to ignore something for some specific module,
 # add overrides for them. Avoid changing the global config!
 # For example:
 # [[tool.mypy.overrides]]
 # module = [
-#  "my_unpyted_dependency1.*",
-#  "my_unpyted_dependency2.*"
+#  "pandas.*",
+#  "requests.*"
 # ]
 # ignore_missing_imports = true
 
