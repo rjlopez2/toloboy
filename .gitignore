@@ -80,3 +80,6 @@ venv.bak/
 
 # testing
 /test.py
+
+# vs code
+.vscode
