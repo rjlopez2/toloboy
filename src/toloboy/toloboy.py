@@ -60,9 +60,9 @@ def RGB2LAB(
 
 
 def LAB22RGB(
-    L: npt.NDArray[np.uint8],
-    a: npt.NDArray[np.uint8],
-    b: npt.NDArray[np.uint8],
+    L: npt.NDArray[np.float32],
+    a: npt.NDArray[np.float32],
+    b: npt.NDArray[np.float32],
 ) -> tuple[np.uint8, np.uint8, np.uint8]:
     """
     LAB22RGB _summary_
@@ -124,14 +124,14 @@ def LAB22RGB(
 
 
 def from_LAB_to_RGB_img(
-    L: npt.NDArray[np.uint8],
-    AB: npt.NDArray[np.uint8],
+    L: npt.NDArray[np.float32],
+    AB: npt.NDArray[np.float32],
 ) -> npt.NDArray[np.uint8]:
     """
     Takes the L and AB channels retunred from the transformation and
     convert the image to RGB colorspace.
 
-    retuns a 3d np.
+    retuns a 3d np.array
 
     Parameters
     ----------
@@ -234,7 +234,7 @@ def plot_multiple_imgs(
 ###########################
 
 
-def psnr(img1: npt.NDArray[np.uint8], img2: npt.NDArray[np.uint8]) -> float | Any:
+def psnr(imageA: npt.NDArray[np.uint8], imageB: npt.NDArray[np.uint8]) -> float | Any:
     """
     psnr
 
@@ -257,7 +257,7 @@ def psnr(img1: npt.NDArray[np.uint8], img2: npt.NDArray[np.uint8]) -> float | An
     float | Any
         the psnr value from the two images
     """
-    mse = np.mean((img1.astype("float") - img2.astype("float")) ** 2)
+    mse = np.mean((imageA.astype("float") - imageB.astype("float")) ** 2)
     # print(mse)
     if mse == 0:
         return 100
