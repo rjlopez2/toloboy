@@ -5,6 +5,9 @@ import pandas as pd
 from PIL import Image
 import requests
 from io import BytesIO
+from __future__ import annotations
+from typing import Any
+import numpy.typing as npt
 # from torch.utils.data import Dataset #NOTE: installing pytorch with poetry is a pain in the ass!
 
 ####################
@@ -15,12 +18,30 @@ from io import BytesIO
 #### Color space transformers functions ####
 ############################################
 
-def RGB2LAB2(R0, G0, B0):
+def RGB2LAB2(R0: npt.NDArray[np.uint8], G0: npt.NDArray[np.uint8], B0: npt.NDArray[np.uint8]) ->  'tuple[npt.NDArray[np.float32],npt.NDArray[np.float32],npt.NDArray[np.float32]]':
     """
     convert RGB to the personal LAB (LAB2) 
     the input R,G,B,  must be 1D from 0 to 255 
     the outputs are 1D  L [0 1], a [-1 1] b [-1 1]
-    """
+
+    Expeceted arguments are flattened array for each
+    channel (RGB).
+
+    Parameters
+    ----------
+    R0 : np.uint8
+        1D numpy array containing the R channel from an RGB image array.
+    G0 : np.uint8
+        1D numpy array containing the G channel from an RGB image array.
+    B0 : np.uint8
+        1D numpy array containing the B channel from an RGB image array.
+
+    Returns
+    -------
+    tuple[np.uint8, np.uint8, np.uint8]
+        return a tuple of size 3 containing the 1D channels (L, A, B)
+    """    
+   
 
     R=R0/255
     G=G0/255
@@ -32,20 +53,38 @@ def RGB2LAB2(R0, G0, B0):
     Z=0.012*R + 0.089*G + 0.899*B  
         
     L = Y
-    a = (X - Y)/0.234
-    b = (Y - Z)/0.785
+    A = (X - Y)/0.234
+    B = (Y - Z)/0.785
     
-    return L, a, b
+    return L, A, B
 
 
 
-def LAB22RGB(L, a, b):
+
+def LAB22RGB(L: npt.NDArray[np.uint8], a: npt.NDArray[np.uint8], b: npt.NDArray[np.uint8]) ->  'tuple[np.uint8, np.uint8, np.uint8]':
     """
-    convert the personal LAB (LAB2)to the RGB 
+    LAB22RGB _summary_
+
+    onvert the personal LAB (LAB2)to the RGB 
     the input L,a,b,  must be 1D L [0 1], a [-1 1] b [-1 1]
     the outputs are 1D  R g B [0 255]
-    """
+
+    Parameters
+    ----------
+    L : np.uint8
+        1D numpy array containing the L channel from an LAB image array.
+    a : np.uint8
+        1D numpy array containing the A channel from an LAB image array.
+    b : np.uint8
+        1D numpy array containing the B channel from an LAB image array.
+
+    Returns
+    -------
+    tuple[np.uint8, np.uint8, np.uint8]
+        return a tuple of size 3 containing the 1D channels (R, G. B)
     
+    """       
+    # L, a, b = [array.reshape(-1, 1) for array in [L, a, b]]
     a11 = 0.299
     a12 = 0.587
     a13 = 0.114
@@ -83,15 +122,27 @@ def LAB22RGB(L, a, b):
 
 
 
-def from_LAB_to_RGB_img(L, AB):
+def from_LAB_to_RGB_img(L: npt.NDArray[np.uint8], AB:npt.NDArray[np.uint8]) -> 'npt.NDArray[np.uint8]':
     """
     Takes the L and AB channels retunred from the transformation and 
     convert the image to RGB colorspace.
-    """
 
-    # print("*** Transforming LAB img to RGB ***")    
+    retuns a 3d np.
+
+    Parameters
+    ----------
+    L : _type_
+        _description_
+    AB : _type_
+        _description_
+
+    Returns
+    -------
+    np.ndarray : 
+    A 3D numpyarray containing the RGB image.
+    """
     x_dim, y_dim = L.shape[0], L.shape[1]
-    predicted_RGB=np.uint8(np.zeros((x_dim,y_dim,3)))
+    predicted_RGB = np.zeros((x_dim,y_dim,3), dtype=np.uint8)
     AB = np.squeeze(AB)
     # print(f"Shape o AB in conversion is {AB.shape}")
     a0, b0 = AB[:, :, 0], AB[:, :, 1]
@@ -111,10 +162,35 @@ def from_LAB_to_RGB_img(L, AB):
 
 
 
-def plot_multiple_imgs(orig_img, imgs_ls, with_orig=True, col_title=None, img_size = 10, font_s = 12, **imshow_kwargs):
+def plot_multiple_imgs(orig_img: npt.NDArray[np.uint8], imgs_ls: list[npt.NDArray[np.uint8] | Any], with_orig:bool=True, col_title: 'list[str] | Any' = None, img_size: int = 10, font_s: int = 12, **imshow_kwargs:Any) -> None:   
     """
-    Usefull to compare a reference image with list of additional images.
-    """
+    Plot a reference image with a list of other images.
+
+    Usefull to compare a reference image with 
+    a list of additional images after transformation,
+    prediction, etc.
+
+    Parameters
+    ----------
+    orig_img : npt.NDArray[np.uint8]
+        The reference image.
+    imgs_ls : list[npt.NDArray[np.uint8]  |  Any]
+        A list of one or multiples images.
+    with_orig : bool, optional
+        NOTE: need to check what this does in practice dso I can maybe remove it, by default True
+    col_title : list[str] | Any, optional
+        List of titles to ad to the images , by default "None"
+    img_size : int, optional
+        size of the canvas, by default 10
+    font_s : int, optional
+        font size for the titles, by default 12
+
+    Returns
+    -------
+    None
+        return a plot of multiples images. 
+    """    
+  
 
     if not isinstance(imgs_ls[0], list):
         # Make a 2d grid even if there's just 1 row
@@ -128,16 +204,9 @@ def plot_multiple_imgs(orig_img, imgs_ls, with_orig=True, col_title=None, img_si
         for col_idx, img in enumerate(row):
             ax = axs[row_idx, col_idx]
             ax.imshow(np.asarray(img), **imshow_kwargs)
-            ax.set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
-
-    # if with_orig:
-    #     axs[0, 0].set(title='Original image')
-    #     axs[0, 0].title.set_size(8)
-    
+            ax.set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])    
     
     if col_title is not None:
-        # for row_idx in range(num_rows):
-        #     axs[row_idx, 0].set(ylabel=col_title[row_idx])
         for ax, title in zip(axs.flatten(), col_title):
             ax.set_title(f"{title}", fontsize=font_s)
     else:
@@ -153,7 +222,7 @@ def plot_multiple_imgs(orig_img, imgs_ls, with_orig=True, col_title=None, img_si
 ###########################
 
 
-def psnr(img1, img2):
+def psnr(img1: npt.NDArray[np.uint8], img2: npt.NDArray[np.uint8]) -> Any:
     mse = np.mean( (img1.astype("float") - img2.astype("float")) ** 2 )
     # print(mse)
     if mse == 0:
@@ -163,7 +232,7 @@ def psnr(img1, img2):
 
 
 
-def mse(imageA, imageB, nband):
+def mse(imageA: npt.NDArray[np.uint8], imageB: npt.NDArray[np.uint8], nband: int) -> Any:
 	"""
     the 'Mean Squared Error' between the two images is the
 	sum of the squared difference between the two images;
@@ -192,7 +261,7 @@ def mse(imageA, imageB, nband):
 
 
 
-def rmse(imageA, imageB, nband):
+def rmse(imageA: npt.NDArray[np.uint8], imageB: npt.NDArray[np.uint8], nband: int) -> Any:
 	# the 'Root Mean Squared Error' between the two images is the
 	# sum of the squared difference between the two images;
 	# NOTE: the two images must have the same dimension
@@ -208,47 +277,47 @@ def rmse(imageA, imageB, nband):
 
 # the idea was borrowed from here: https://towardsdatascience.com/custom-dataset-in-pytorch-part-1-images-2df3152895
 
-class Swisstopodataset(Dataset):
-    def __init__(self, img_indx, transform = None, large_dataset=False, return_label = True):
-        self.img_indx = img_indx
-        self.transform = transform
-        self.large_dataset = large_dataset
-        self.return_label = return_label
-        # self.augment = augment
+# class Swisstopodataset(Dataset):
+#     def __init__(self, img_indx, transform = None, large_dataset=False, return_label = True):
+#         self.img_indx = img_indx
+#         self.transform = transform
+#         self.large_dataset = large_dataset
+#         self.return_label = return_label
+#         # self.augment = augment
 
-    def __len__(self):
-        return len(self.img_indx)
+#     def __len__(self):
+#         return len(self.img_indx)
 
-    def __getitem__(self, idx):
-        # img_filepath  = self.img_indx[idx]
-        if self.large_dataset:
-            port = 1986
-        else:
-            port = 1985
-        raw_data_csv_file_link = f"https://perritos.myasustor.com:{port}/metadata.csv"
-        metadata_file = pd.read_csv(raw_data_csv_file_link, index_col=0)
-        img_in_server_link = f"https://perritos.myasustor.com:{port}/data/img_id_{self.img_indx[idx]}.jpg"
-        response = requests.get(img_in_server_link)
-        image = Image.open(BytesIO(response.content))
-        # image = cv2.imread(img_filepath)
-        # image = Image.fromarray(image)
+#     def __getitem__(self, idx):
+#         # img_filepath  = self.img_indx[idx]
+#         if self.large_dataset:
+#             port = 1986
+#         else:
+#             port = 1985
+#         raw_data_csv_file_link = f"https://perritos.myasustor.com:{port}/metadata.csv"
+#         metadata_file = pd.read_csv(raw_data_csv_file_link, index_col=0)
+#         img_in_server_link = f"https://perritos.myasustor.com:{port}/data/img_id_{self.img_indx[idx]}.jpg"
+#         response = requests.get(img_in_server_link)
+#         image = Image.open(BytesIO(response.content))
+#         # image = cv2.imread(img_filepath)
+#         # image = Image.fromarray(image)
 
-        # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        # define here a label if existing
-        label = metadata_file["class"].iloc[idx]
+#         # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+#         # define here a label if existing
+#         label = metadata_file["class"].iloc[idx]
 
-        if self.transform is not None:
-            # print ("*** Transforming RGB img to LAB ***")
-            image = self.transform(image)
+#         if self.transform is not None:
+#             # print ("*** Transforming RGB img to LAB ***")
+#             image = self.transform(image)
         
-        # if self.augment is not None:
-        #     # print ("*** Applying augmentation on L channel ***")
-        #     image_L, imageAB = image
-        #     image_L = self.augment(image_L)
-        #     image = (image_L, imageAB)
+#         # if self.augment is not None:
+#         #     # print ("*** Applying augmentation on L channel ***")
+#         #     image_L, imageAB = image
+#         #     image_L = self.augment(image_L)
+#         #     image = (image_L, imageAB)
 
 
-        if self.return_label:
-            return image, label
-        else:
-            return image
+#         if self.return_label:
+#             return image, label
+#         else:
+#             return image
