@@ -24,6 +24,8 @@ repos:
       - id: ruff
         name: ruff
         # Add --fix, in case you want it to autofix when this hook runs
+        args:
+          - --fix
         entry: poetry run ruff check --force-exclude
         require_serial: true
         language: system
