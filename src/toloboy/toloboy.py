@@ -222,7 +222,29 @@ def plot_multiple_imgs(orig_img: npt.NDArray[np.uint8], imgs_ls: list[npt.NDArra
 ###########################
 
 
-def psnr(img1: npt.NDArray[np.uint8], img2: npt.NDArray[np.uint8]) -> Any:
+def psnr(img1: npt.NDArray[np.uint8], img2: npt.NDArray[np.uint8]) -> 'float | Any':
+    """
+    psnr 
+
+    Compute the 'Peak Signal-to-Noise Ratio' (psnr) metric
+    from two given images.
+    High PSNR Value: Indicates high image quality.
+    NOTE: the two images must have the same dimension
+
+    ref: https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio
+
+    Parameters
+    ----------
+    img1 : npt.NDArray[np.uint8]
+        reference image
+    img2 : npt.NDArray[np.uint8]
+        reconstructed image
+
+    Returns
+    -------
+    float | Any
+        the psnr value from the two images
+    """ 
     mse = np.mean( (img1.astype("float") - img2.astype("float")) ** 2 )
     # print(mse)
     if mse == 0:
@@ -232,43 +254,96 @@ def psnr(img1: npt.NDArray[np.uint8], img2: npt.NDArray[np.uint8]) -> Any:
 
 
 
-def mse(imageA: npt.NDArray[np.uint8], imageB: npt.NDArray[np.uint8], nband: int) -> Any:
-	"""
-    the 'Mean Squared Error' between the two images is the
-	sum of the squared difference between the two images;
-	NOTE: the two images must have the same dimension
+def mse(imageA: npt.NDArray[np.uint8], imageB: npt.NDArray[np.uint8], nband: int) -> 'float | Any':
     """
-	err = np.sum((imageA.astype("float") - imageB.astype("float")) ** 2)
-	err /= float(imageA.shape[0] * imageA.shape[1] * nband)
-	
-	# return the MSE, the lower the error, the more "similar"
-	# the two images are
-	return err
+    mse 
 
-
-
-# def mae(imageA, imageB, bands):
-# 	"""
-#     the 'Mean Absolute Error' between the two images is the
-# 	sum of the squared difference between the two images;
-# 	NOTE: the two images must have the same dimension
-#     """
-# 	err = np.sum(np.abs(imageA.astype("float") - imageB.astype("float")))
-# 	err /= float(imageA.shape[0] * imageA.shape[1] * bands)
+    Compute the 'Mean Squared Error' (mse) metric
+    from two given images. The mse is the
+	sum of the squared difference between the two images.
+    The lower the value the more similar.
+    NOTE: the two images must have the same dimension
     
-#     return err
+
+    Parameters
+    ----------
+    imageA : npt.NDArray[np.uint8]
+        reference image
+    imageB : npt.NDArray[np.uint8]
+        reconstructed image
+    nband : int
+        number of channels in the image? -> need to check!
+
+    Returns
+    -------
+    float | Any
+        the mse value from the two images
+    """
+    err = np.sum((imageA.astype("float") - imageB.astype("float")) ** 2)
+    err /= float(imageA.shape[0] * imageA.shape[1] * nband)
+	
+    return err
 
 
 
+def mae(imageA: npt.NDArray[np.uint8], imageB: npt.NDArray[np.uint8], nband: int) -> 'float | Any':
+    """
+    mae 
+    
+    Compute the 'Mean Absolute Error' (mae) metric
+    from two given images. The mse between the two images is the
+	sum of the squared difference between the two images.
+    NOTE: the two images must have the same dimension
 
-def rmse(imageA: npt.NDArray[np.uint8], imageB: npt.NDArray[np.uint8], nband: int) -> Any:
-	# the 'Root Mean Squared Error' between the two images is the
-	# sum of the squared difference between the two images;
-	# NOTE: the two images must have the same dimension
-	err = np.sum((imageA.astype("float") - imageB.astype("float")) ** 2)
-	err /= float(imageA.shape[0] * imageA.shape[1] * nband)
-	err = np.sqrt(err)
-	return err
+    Parameters
+    ----------
+    imageA : npt.NDArray[np.uint8]
+        reference image
+    imageB : npt.NDArray[np.uint8]
+        reconstructed image
+    nband : int
+        number of channels in the image? -> need to check!
+
+    Returns
+    -------
+    float | Any
+        _description_
+    """
+    err = np.sum(np.abs(imageA.astype("float") - imageB.astype("float")))
+    err /= float(imageA.shape[0] * imageA.shape[1] * nband)    
+    return err
+
+
+
+def rmse(imageA: npt.NDArray[np.uint8], imageB: npt.NDArray[np.uint8], nband: int) -> 'float | Any':
+    """
+    rmse 
+
+    Compute the 'Root Mean Squared Error' (rmse) metric
+    from two given images.
+    The rmse between the two images is the
+	sum of the squared difference between the two images.
+    NOTE: the two images must have the same dimension
+    
+
+    Parameters
+    ----------
+    imageA : npt.NDArray[np.uint8]
+        reference image
+    imageB : npt.NDArray[np.uint8]
+        reconstructed image
+    nband : int
+        number of channels in the image? -> need to check!
+
+    Returns
+    -------
+    float | Any
+        the rmse value from the two images
+    """
+    err = np.sum((imageA.astype("float") - imageB.astype("float")) ** 2)
+    err /= float(imageA.shape[0] * imageA.shape[1] * nband)
+    err = np.sqrt(err)
+    return err
 
 
 ##############################
