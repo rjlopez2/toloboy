@@ -7,8 +7,6 @@ import numpy as np
 import numpy.typing as npt
 from matplotlib import pyplot as plt
 
-# from torch.utils.data import Dataset #NOTE: installing pytorch with poetry is a pain in the ass!
-
 ####################
 #### functions #####
 ####################
@@ -18,10 +16,10 @@ from matplotlib import pyplot as plt
 ############################################
 
 
-def RGB2LAB2(
-    R0: npt.NDArray[np.uint8],
-    G0: npt.NDArray[np.uint8],
-    B0: npt.NDArray[np.uint8],
+def RGB2LAB(
+    r0: npt.NDArray[np.uint8],
+    g0: npt.NDArray[np.uint8],
+    b0: npt.NDArray[np.uint8],
 ) -> tuple[npt.NDArray[np.float32], npt.NDArray[np.float32], npt.NDArray[np.float32]]:
     """
     convert RGB to the personal LAB (LAB2)
@@ -46,9 +44,9 @@ def RGB2LAB2(
         return a tuple of size 3 containing the 1D channels (L, A, B)
     """
 
-    R = R0 / 255
-    G = G0 / 255
-    B = B0 / 255
+    R = r0 / 255
+    G = g0 / 255
+    B = b0 / 255
 
     Y = 0.299 * R + 0.587 * G + 0.114 * B
     X = 0.449 * R + 0.353 * G + 0.198 * B
@@ -167,7 +165,7 @@ def from_LAB_to_RGB_img(
 def plot_multiple_imgs(
     orig_img: npt.NDArray[np.uint8],
     imgs_ls: list[npt.NDArray[np.uint8] | Any],
-    with_orig: bool = True,
+    with_orig: bool = True,  # noqa: FBT001, FBT002
     col_title: list[str] | Any = None,
     img_size: int = 10,
     font_s: int = 12,
@@ -214,7 +212,7 @@ def plot_multiple_imgs(
         figsize=(img_size, img_size),
     )
     for row_idx, row in enumerate(imgs_ls):
-        row = [orig_img] + row if with_orig else row
+        row = [orig_img] + row if with_orig else row  # noqa: RUF005
         for col_idx, img in enumerate(row):
             ax = axs[row_idx, col_idx]
             ax.imshow(np.asarray(img), **imshow_kwargs)
@@ -364,5 +362,4 @@ def rmse(
     """
     err = np.sum((imageA.astype("float") - imageB.astype("float")) ** 2)
     err /= float(imageA.shape[0] * imageA.shape[1] * nband)
-    err = np.sqrt(err)
-    return err
+    return np.sqrt(err)
