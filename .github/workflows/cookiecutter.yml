@@ -19,9 +19,7 @@ jobs:
 
       - name: Update project structure
         run: |
-          pwd
-          ls .
-          ls ..
+          cd src
           cruft update -y
 
       - name: Check if there are changes
