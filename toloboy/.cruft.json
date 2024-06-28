@@ -1,0 +1,18 @@
+{
+  "template": "https://github.com/woltapp/wolt-python-package-cookiecutter",
+  "commit": "b25684a2c63387153b83a1cc03ea332be8c8279a",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "author_name": "Ruben",
+      "author_email": "rjlopez2@gmail.com",
+      "github_username": "rjlopez2",
+      "project_name": "toloboy",
+      "project_slug": "toloboy",
+      "package_name": "toloboy",
+      "project_short_description": "Utils for ML project on colorizing aereal historiacal images.",
+      "_template": "https://github.com/woltapp/wolt-python-package-cookiecutter"
+    }
+  },
+  "directory": null
+}
