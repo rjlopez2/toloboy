@@ -14,5 +14,5 @@
       "_template": "https://github.com/woltapp/wolt-python-package-cookiecutter"
     }
   },
-  "directory": null
+  "directory": "src"
 }
